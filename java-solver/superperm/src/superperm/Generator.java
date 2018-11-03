@@ -1,11 +1,15 @@
 package superperm;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Date;
 import java.util.HashMap;
 
 public class Generator {
 
-	String pattern = "ABCDEF"; //n = length of pattern
+	static String pattern = "ABCDEFG"; //n = length of pattern
 	
 	HashMap<String, Integer> permLookup = new HashMap<>();
 	String[] perms;
@@ -76,14 +80,30 @@ public class Generator {
 				int row = value / n;
 				chain[i][row >> 6] |= (1L << (row & 0x3F)); // 6 is 2^6, the number of bits in a long, do not replace with n
 			}
-//			System.out.println(getLine(next[value]));
+			System.out.println(getLine(next[value]));
 		}
 	}
 	
 	public static void main(String[] args) {
+	    int initialInserts[] = null, insertCur = 0, maxInsert = 0;
+	    if (args.length >= 1) Generator.pattern = args[0];
+	    if (args.length == 3) {
+	        maxInsert = Integer.parseInt(args[2]);
+            String[] positions = args[1].split(" ");
+            initialInserts = new int[positions.length];
+            for (String p : positions) {
+                int i = Integer.valueOf(p);
+                initialInserts[insertCur++] = i;
+            }
+	    }
 		Generator m = new Generator();
 		System.out.println("Started at: " + new Date().toString());
-		Solver.solve(System.out, m.n, m.next, m.chain);
+		try {
+            Solver.solve(new PrintStream(new FileOutputStream("" + Generator.pattern.length() + "_" + insertCur + "_" + maxInsert + ".txt"), true), m.n, m.next, m.chain, initialInserts, maxInsert);
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 		System.out.println("Ended at: " + new Date().toString());
 	}
 }
